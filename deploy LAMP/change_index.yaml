@@ -1,0 +1,21 @@
+#- name: Alterar index padrão para index.php
+#  command: sudo sed -i 's/index.html/index.php/g' /etc/httpd/conf/httpd.conf
+
+
+- name: Alterar index padrão para index.php
+  replace:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: 'DirectoryIndex index.html'
+    replace: 'DirectoryIndex index.php'
+    #backup: yes  #caso queira fazer um backup do arquivo, em mudanças muito complexas
+
+- name: Reiniciar serviço do httpd
+  service:
+    name: httpd
+    state: restarted
+
+- name: Alterar conexão do IP de comunicação do banco
+  replace:
+    path: /var/www/html/index.php
+    regexp: '172.20.1.101'
+    replace: 'localhost'

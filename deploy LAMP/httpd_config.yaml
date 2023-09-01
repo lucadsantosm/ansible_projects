@@ -1,0 +1,6 @@
+- name: Ativar e Startar o serviço
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+  

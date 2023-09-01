@@ -1,0 +1,63 @@
+- name: Instalar MariaDB
+  yum:
+    name:
+     - mariadb-server
+     - python3-PyMySQL
+    state: present
+
+- name: Ativar e Iniciar MariaDB
+  service:
+    name: mariadb
+    enabled: true
+    state: started
+
+- name: Criar usuário Root no arquivo de Config
+  blockinfile:
+    path: /root/my.cnf
+    block: |
+        [client]
+        user=root
+        password={{ mysql_root_password }}
+
+        [mysql]
+        user=root
+        password={{ mysql_root_password }}
+
+        [mysqldump]
+        user=root
+        password={{ mysql_root_password }}
+
+        [mysqldiff]
+        user=root
+        password={{ mysql_root_password }}
+    create: yes
+
+
+#Conexão sem senha nao funciona via ansible, necessário forçar conexao via socket
+#e então definir uma senha.
+- name: mysql_root_password
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    user: root
+    password: "{{ mysql_root_password }}"
+    host: localhost
+
+- name: Criar usuário ecom
+  mysql_user:
+   user: ecomuser
+   password: ecompassword
+   priv: '*.*:ALL'
+   state: present
+
+- name: Criar dump para popular a tabela
+  copy:
+    path: /tmp/db-load-script.sql
+    content: 'USE ecomdb; CREATE TABLE products (id mediumint(8) unsigned NOT NULL auto_increment,Name varchar(255) default NULL,Price varchar(255) default NULL, ImageUrl varchar(255) default NULL,PRIMARY KEY (id)) AUTO_INCREMENT=1; INSERT INTO products (Name,Price,ImageUrl) VALUES ("Laptop","100","c-1.png"),("Drone","200","c-2.png"),("VR","300","c-3.png"),("Tablet","50","c-5.png"),("Watch","90","c-6.png"),("Phone Covers","20","c-7.png"),("Phone","80","c-8.png"),("Laptop","150","c-4.png");'
+
+- name: Criar database importando estrutura do arquivo dump
+  mysql_db:
+    name: ecomdb
+    state: import
+    target: /tmp/db-load-script.sql
+  ignore_errors: yes #usar caso tabela já exista. Pode-se criar uma tarefa abaixo para validar se a tabela existe

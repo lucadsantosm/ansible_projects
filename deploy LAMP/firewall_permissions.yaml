@@ -1,0 +1,13 @@
+- name: Configurar Regras de firewall do MariaDB
+  firewalld:
+    port: 3306/tcp
+    zone: public
+    state: enabled
+    permanent: true
+
+- name: Configurar Regras de Firewall para httpd
+  firewalld:
+    port: 80/tcp
+    zone: public
+    state: enabled
+    permanent: true

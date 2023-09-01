@@ -1,0 +1,5 @@
+- name: Instalar httpd
+  package:
+   - yum:
+       name: httpd
+       state: present

@@ -1,0 +1,10 @@
+- name: Instalar php
+  yum:
+    name: php
+    state: present
+
+- name: Instalar php-mysql
+  package:
+    - dnf:
+        name: php-mysqlnd.x86_64
+        state: present
